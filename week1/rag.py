@@ -37,7 +37,17 @@ QUESTION = (
 
 
 # TODO: Fill this in!
-YOUR_SYSTEM_PROMPT = ""
+YOUR_SYSTEM_PROMPT = """You are a careful RAG coding assistant.
+Follow this process:
+1. Read the supplied context and extract only factual details about the API.
+2. If required information is missing, state the gap instead of inventing details. Avoid hallucinations! 
+3. When enough information is present, output exactly one Python code block containing:
+   - Necessary imports (e.g., requests).
+   - A function `fetch_user_name(user_id: str, api_key: str) -> str` that uses the documented base URL and `/users/{id}` endpoint.
+   - An HTTP GET with the documented `X-API-Key` header, calling `response.raise_for_status()` before parsing JSON.
+   - Returning only the `name` string from the JSON response.
+4. Do not include any explanation outside the code block.
+"""
 
 
 # For this simple example
@@ -56,7 +66,13 @@ def YOUR_CONTEXT_PROVIDER(corpus: List[str]) -> List[str]:
 
     For example, return [] to simulate missing context, or [corpus[0]] to include the API docs.
     """
-    return []
+    context: List[str] = []
+    for doc in corpus:
+        if not doc:
+            continue
+        if "Base URL:" in doc or "/users/" in doc:
+            context.append(doc)
+    return context
 
 
 def make_user_prompt(question: str, context_docs: List[str]) -> str:
@@ -97,7 +113,7 @@ def test_your_prompt(system_prompt: str, context_provider: Callable[[List[str]],
     for idx in range(NUM_RUNS_TIMES):
         print(f"Running test {idx + 1} of {NUM_RUNS_TIMES}")
         response = chat(
-            model="llama3.1:8b",
+            model="llama3.2:3b",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},

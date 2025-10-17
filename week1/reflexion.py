@@ -1,12 +1,9 @@
-import os
 import re
 from typing import Callable, List, Tuple
 from dotenv import load_dotenv
 from ollama import chat
 
 load_dotenv()
-
-NUM_RUNS_TIMES = 1
 
 SYSTEM_PROMPT = """
 You are a coding assistant. Output ONLY a single fenced Python code block that defines
@@ -15,7 +12,13 @@ Keep the implementation minimal.
 """
 
 # TODO: Fill this in!
-YOUR_REFLEXION_PROMPT = ""
+YOUR_REFLEXION_PROMPT = """You are a senior Python engineer reviewing a previous attempt at `is_valid_password`.
+First, read the failures to understand which password rules were missed. Then provide ONLY a single fenced Python code block containing an updated `is_valid_password(password: str) -> bool`.
+Implementation requirements:
+- Return True only when the password length is at least 8, it has lowercase, uppercase, digit, a character from SPECIALS = set("!@#$%^&*()-_"), and has no whitespace.
+- Include explicit checks for each rule, including `any(c.isupper() for c in password)`. Do not remove the lowercase, digit, special, or whitespace checks.
+- Reuse the module-level SPECIALS constant rather than redefining it.
+Reply with the corrected function code block and nothing else."""
 
 
 # Ground-truth test suite used to evaluate generated code
@@ -81,7 +84,7 @@ def evaluate_function(func: Callable[[str], bool]) -> Tuple[bool, List[str]]:
 
 def generate_initial_function(system_prompt: str) -> str:
     response = chat(
-        model="llama3.1:8b",
+        model="llama3.2:3b",
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": "Provide the implementation now."},
@@ -96,7 +99,13 @@ def your_build_reflexion_context(prev_code: str, failures: List[str]) -> str:
 
     Return a string that will be sent as the user content alongside the reflexion system prompt.
     """
-    return ""
+    failure_section = "\n".join(f"- {f}" for f in failures) or "- No specific failures reported."
+    return (
+        "Test failures:\n"
+        f"{failure_section}\n\n"
+        "Previous code:\n"
+        f"```python\n{prev_code}\n```"
+    )
 
 
 def apply_reflexion(
@@ -108,7 +117,7 @@ def apply_reflexion(
     reflection_context = build_context(prev_code, failures)
     print(f"REFLECTION CONTEXT: {reflection_context}, {reflexion_prompt}")
     response = chat(
-        model="llama3.1:8b",
+        model="llama3.2:3b",
         messages=[
             {"role": "system", "content": reflexion_prompt},
             {"role": "user", "content": reflection_context},

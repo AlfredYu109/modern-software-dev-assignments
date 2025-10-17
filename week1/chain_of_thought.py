@@ -8,7 +8,18 @@ load_dotenv()
 NUM_RUNS_TIMES = 5
 
 # TODO: Fill this in!
-YOUR_SYSTEM_PROMPT = ""
+YOUR_SYSTEM_PROMPT = '''
+You are an expert assistant at mathematics. 
+Think this through step by step, with the following logic: 
+
+1. Restate the goal in your own words.
+2. Work through the solution step-by-step, showing all intermediate reasoning (use bullet-style thoughts if that keeps things clear).
+3. Keep all scratch work in plain text—no hidden steps.
+4. End by checking that the final result satisfies the conditions.
+5. On the last line, report the final result exactly as Answer: <number>.
+
+Output ONLY the final asnwer, nothing else! 
+'''
 
 
 USER_PROMPT = """
@@ -48,7 +59,7 @@ def test_your_prompt(system_prompt: str) -> bool:
     for idx in range(NUM_RUNS_TIMES):
         print(f"Running test {idx + 1} of {NUM_RUNS_TIMES}")
         response = chat(
-            model="llama3.1:8b",
+            model="llama3.2:3b",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": USER_PROMPT},

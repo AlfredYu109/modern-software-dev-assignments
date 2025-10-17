@@ -70,7 +70,11 @@ TOOL_REGISTRY: Dict[str, Callable[..., str]] = {
 # ==========================
 
 # TODO: Fill this in!
-YOUR_SYSTEM_PROMPT = ""
+YOUR_SYSTEM_PROMPT = '''
+You are an assistant that must respond with a single JSON object representing a tool call.
+Always call the tool named "output_every_func_return_type" and include an "args" object (use {} if no arguments are needed).
+Return only the JSON object with no additional text, commentary, or code fences.
+'''
 
 
 def resolve_path(p: str) -> str:
@@ -101,7 +105,7 @@ def extract_tool_call(text: str) -> Dict[str, Any]:
 
 def run_model_for_tool_call(system_prompt: str) -> Dict[str, Any]:
     response = chat(
-        model="llama3.1:8b",
+        model="llama3.2:3b",
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": "Call the tool now."},
