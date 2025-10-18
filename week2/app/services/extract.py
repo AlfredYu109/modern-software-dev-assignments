@@ -5,8 +5,15 @@ import re
 from typing import List
 import json
 from typing import Any
-from ollama import chat
-from dotenv import load_dotenv
+try:
+    from ollama import chat
+except ImportError:  # pragma: no cover - handles environments without Ollama
+    chat = None  # type: ignore[assignment]
+try:
+    from dotenv import load_dotenv
+except ImportError:  # pragma: no cover - optional dependency
+    def load_dotenv(*args: Any, **kwargs: Any) -> bool:
+        return False
 
 load_dotenv()
 
@@ -16,6 +23,20 @@ KEYWORD_PREFIXES = (
     "action:",
     "next:",
 )
+
+
+def _remove_prefix(value: str, prefix: str) -> str:
+    if value.startswith(prefix):
+        return value[len(prefix) :]
+    return value
+
+
+def _trim_keyword_prefix(value: str) -> str:
+    lowered = value.lower()
+    for prefix in KEYWORD_PREFIXES:
+        if lowered.startswith(prefix):
+            return value[len(prefix) :].lstrip()
+    return value
 
 
 def _is_action_line(line: str) -> bool:
@@ -42,8 +63,9 @@ def extract_action_items(text: str) -> List[str]:
             cleaned = BULLET_PREFIX_PATTERN.sub("", line)
             cleaned = cleaned.strip()
             # Trim common checkbox markers
-            cleaned = cleaned.removeprefix("[ ]").strip()
-            cleaned = cleaned.removeprefix("[todo]").strip()
+            cleaned = _remove_prefix(cleaned, "[ ]").strip()
+            cleaned = _remove_prefix(cleaned, "[todo]").strip()
+            cleaned = _trim_keyword_prefix(cleaned)
             extracted.append(cleaned)
     # Fallback: if nothing matched, heuristically split into sentences and pick imperative-like ones
     if not extracted:
@@ -63,6 +85,75 @@ def extract_action_items(text: str) -> List[str]:
             continue
         seen.add(lowered)
         unique.append(item)
+    return unique
+
+
+def extract_action_items_llm(text: str, *, model: str | None = None) -> List[str]:
+    """Use an Ollama-backed LLM to extract action items from free-form text."""
+    if not text or not text.strip():
+        return []
+
+    model_name = (
+        model
+        or os.getenv("OLLAMA_ACTION_MODEL")
+        or os.getenv("OLLAMA_MODEL")
+        or "llama3.1"
+    )
+    schema: dict[str, Any] = {
+        "type": "array",
+        "items": {"type": "string"},
+    }
+    messages = [
+        {
+            "role": "system",
+            "content": (
+                "Extract actionable tasks from the user's notes. "
+                "Respond strictly as a JSON array of strings with each string "
+                "representing one action item."
+            ),
+        },
+        {
+            "role": "user",
+            "content": text.strip(),
+        },
+    ]
+
+    if chat is None:
+        return extract_action_items(text)
+
+    try:
+        response = chat(model=model_name, messages=messages, format=schema)
+    except Exception:
+        return extract_action_items(text)
+
+    content = response.get("message", {}).get("content", "")
+    try:
+        parsed = json.loads(content)
+    except json.JSONDecodeError:
+        return extract_action_items(text)
+
+    if not isinstance(parsed, list):
+        return extract_action_items(text)
+
+    cleaned: List[str] = []
+    for item in parsed:
+        if not isinstance(item, str):
+            continue
+        stripped_item = item.strip()
+        if stripped_item:
+            cleaned.append(stripped_item)
+
+    if not cleaned:
+        return extract_action_items(text)
+
+    seen: set[str] = set()
+    unique: List[str] = []
+    for entry in cleaned:
+        lowered = entry.lower()
+        if lowered in seen:
+            continue
+        seen.add(lowered)
+        unique.append(entry)
     return unique
 
 
