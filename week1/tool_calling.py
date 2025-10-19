@@ -69,7 +69,6 @@ TOOL_REGISTRY: Dict[str, Callable[..., str]] = {
 # Prompt scaffolding
 # ==========================
 
-# TODO: Fill this in!
 YOUR_SYSTEM_PROMPT = '''
 You are an assistant that must respond with a single JSON object representing a tool call.
 Always call the tool named "output_every_func_return_type" and include an "args" object (use {} if no arguments are needed).

@@ -8,7 +8,6 @@ load_dotenv()
 
 NUM_RUNS_TIMES = 5
 
-# TODO: Fill this in! Try to get as close to 100% correctness across all runs as possible.
 YOUR_SYSTEM_PROMPT = '''
 You are an expert at consistent thinking. Think through the question step by step, and ensure that your reasoning format is determinsistic. 
 Verify your computation at each step. 

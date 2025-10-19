@@ -11,7 +11,6 @@ the function is_valid_password(password: str) -> bool. No prose or comments.
 Keep the implementation minimal.
 """
 
-# TODO: Fill this in!
 YOUR_REFLEXION_PROMPT = """You are a senior Python engineer reviewing a previous attempt at `is_valid_password`.
 First, read the failures to understand which password rules were missed. Then provide ONLY a single fenced Python code block containing an updated `is_valid_password(password: str) -> bool`.
 Implementation requirements:

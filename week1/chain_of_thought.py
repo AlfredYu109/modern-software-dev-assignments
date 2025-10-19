@@ -7,7 +7,6 @@ load_dotenv()
 
 NUM_RUNS_TIMES = 5
 
-# TODO: Fill this in!
 YOUR_SYSTEM_PROMPT = '''
 You are an expert assistant at mathematics. 
 Think this through step by step, with the following logic: 

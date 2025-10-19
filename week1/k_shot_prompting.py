@@ -6,7 +6,6 @@ load_dotenv()
 
 NUM_RUNS_TIMES = 5
 
-# TODO: Fill this in!
 YOUR_SYSTEM_PROMPT = '''You are a strict character-reversal engine.  
 You always do this: take the exact input string, reverse it character by character, and output only the reversed string (no explanation, no extra whitespace, no quotes).
 
