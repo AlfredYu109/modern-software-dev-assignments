@@ -9,11 +9,11 @@ Fill out all of the `TODO`s in this file.
 
 ## SUBMISSION DETAILS
 
-Name: **TODO** \
-SUNet ID: **TODO** \
-Citations: **TODO**
+Name: **Alfred Yu** \
+SUNet ID: **ayu1001* \
+Citations: I used Warp to provide the initial scaffolding for this file. 
 
-This assignment took me about **TODO** hours to do. 
+This assignment took me about 1.5 hours to do. 
 
 
 ## YOUR RESPONSES
@@ -52,24 +52,22 @@ This assignment took me about **TODO** hours to do.
 **b. Before vs. after (i.e. manual workflow vs. automated workflow)**
 
 **Before (Manual):**
-1. Manually review endpoint code to understand behavior (~5 min)
-2. Write success test case (~5 min)
-3. Write 404 test case (~3 min)
-4. Write validation error tests for each field (~10 min)
-5. Write edge case tests (~8 min)
-6. Write integration tests (~7 min)
-7. Run tests, fix issues (~5 min)
-8. **Total: ~43 minutes per endpoint**
+1. Manually review endpoint code to understand behavior 
+2. Write success test case 
+3. Write 404 test case 
+4. Write validation error tests for each field 
+5. Write edge case tests
+6. Write integration tests 
+7. Run tests, fix issues 
 
 **After (Automated with Warp Prompt):**
 1. Open Command Palette (`Cmd + P`)
 2. Type "Test Coverage Booster"
-3. Fill in 2 arguments: `endpoint_path`, `module` (~30 seconds)
-4. Press Enter, agent generates all tests (~2 min)
-5. Review generated tests (~3 min)
-6. **Total: ~5.5 minutes per endpoint**
+3. Fill in 2 arguments: `endpoint_path`, `module` 
+4. Press Enter, agent generates all tests
+5. Review generated tests 
 
-**Time saved: ~37.5 minutes per endpoint (87% reduction)**
+
 
 ---
 
@@ -105,25 +103,13 @@ N/A - This is a single-agent automation (Warp Drive saved prompt).
 
 **Pain point resolved:** Writing comprehensive test coverage is tedious and time-consuming, especially when following strict patterns like response envelopes.
 
-**How used:**
-- Applied to Tasks #7 and #10 to generate test coverage for notes and action items endpoints
-- Generated 30+ test cases across multiple test files
-- Ensured consistency in test structure (all tests check envelope format)
-- Reduced cognitive load by automating repetitive assertion patterns
-
-**Real example:** After implementing Task #7 (error handling), I used this prompt to generate validation tests:
-```
-endpoint_path: /notes/
-module: notes
-```
-Agent generated tests for:
+**How I used this:**
+The agent was able to generate extensive tests for: 
 - Empty title/content validation
 - Whitespace-only validation
 - Missing field validation
 - Max length boundary testing
 - 404 not found scenarios
-
-This would have taken ~40 minutes manually but took ~5 minutes with the automation.
 
 ---
 
@@ -149,7 +135,6 @@ This would have taken ~40 minutes manually but took ~5 minutes with the automati
 - Router registration in `backend/app/main.py`
 - Test file `backend/tests/test_{resource_name}.py` with comprehensive coverage
 - All responses wrapped in `SuccessResponse` envelopes
-- Passing `make test` and `make lint`
 
 **Steps:**
 1. Create SQLAlchemy model with appropriate columns and indexes
@@ -166,32 +151,29 @@ This would have taken ~40 minutes manually but took ~5 minutes with the automati
 **b. Before vs. after (i.e. manual workflow vs. automated workflow)**
 
 **Before (Manual):**
-1. Create SQLAlchemy model (~10 min)
-2. Create Pydantic schemas with validators (~8 min)
-3. Create router file with 5 endpoints (~25 min)
-4. Wrap all responses in envelopes (~5 min)
-5. Add router to main.py (~2 min)
-6. Write tests for all endpoints (~35 min)
-7. Debug and fix issues (~10 min)
-8. Run lint, fix formatting (~3 min)
-9. **Total: ~98 minutes (1 hour 38 min) per resource**
+1. Create SQLAlchemy model 
+2. Create Pydantic schemas with validators 
+3. Create router file with 5 endpoints 
+4. Wrap all responses in envelopes 
+5. Add router to main.py 
+6. Write tests for all endpoints 
+7. Debug and fix issues 
+8. Run lint, fix formatting 
+
 
 **After (Automated with Warp Prompt):**
 1. Open Command Palette (`Cmd + P`)
 2. Type "Add CRUD Endpoint"
-3. Fill in 2 arguments: `RESOURCE_NAME`, `resource_name` (~30 seconds)
-4. Press Enter, agent generates all files (~5 min)
-5. Review generated code (~5 min)
-6. Make minor adjustments if needed (~3 min)
-7. **Total: ~13.5 minutes per resource**
-
-**Time saved: ~84.5 minutes per resource (86% reduction)**
+3. Fill in 2 arguments: `RESOURCE_NAME`, `resource_name`
+4. Press Enter, agent generates all files
+5. Review generated code 
+6. Make minor adjustments if needed 
 
 ---
 
 **c. Autonomy levels used for each completed task (what code permissions, why, and how you supervised)**
 
-**Autonomy Level:** High autonomy with full write permissions
+**Autonomy Level:** High autonomy was granted with full write permissions
 
 **Permissions granted:**
 - Read access to existing codebase patterns
@@ -207,10 +189,7 @@ This would have taken ~40 minutes manually but took ~5 minutes with the automati
 **Supervision approach:**
 1. Review model schema (columns, types, constraints)
 2. Verify schema validation logic (min_length, whitespace checks)
-3. Spot-check 1-2 endpoints for proper envelope wrapping
-4. Review test coverage breadth
-5. Verify `make test` passes with no failures
-6. Verify `make lint` passes
+3. Review test coverage breadth
 
 ---
 
@@ -224,24 +203,11 @@ N/A - This is a single-agent automation (Warp Drive saved prompt).
 
 **Pain point resolved:** Scaffolding new REST resources is highly repetitive. Every resource needs the same boilerplate: model, schemas, 5 CRUD endpoints, envelope wrapping, tests. Manually writing this is error-prone and time-consuming.
 
-**How used:**
-- Can be used to quickly add new features like Tags (Task #5), Categories, Comments, etc.
-- Ensures consistency across all resources (same validation patterns, same envelope structure)
-- Reduces context-switching between files (agent handles all 6 files)
-- Eliminates copy-paste errors from duplicating existing resources
+**How I used it:**
+I was able to implement a CRUD enpoint fairly painlessly and without much labor on my end - significantly saving time. 
+This can be used for future tasks as well to free-up time. 
 
-**Example use case:** If I wanted to add a "Tag" feature:
-```
-RESOURCE_NAME: Tag
-resource_name: tags
-```
-Agent would generate:
-- Tag model with `id`, `name` columns
-- TagCreate/TagRead schemas with validation
-- Complete tags router with 5 endpoints
-- ~15 test cases
-
-**Key benefit:** Freed up mental energy to focus on business logic and unique features rather than boilerplate scaffolding.
+**Key benefit:** This allowed for freed up mental energy to focus on business logic and unique features rather than boilerplate scaffolding.
 
 
 
@@ -258,6 +224,8 @@ Agent would generate:
 - **Agent 2 - Backend Action Items Pagination**: Add `page` and `page_size` parameters to `GET /action-items`, return `{"items": [...], "total": count}`
 - **Agent 3 - Frontend Pagination UI**: Update frontend to handle paginated responses, add prev/next controls
 - **Agent 4 - Pagination Tests**: Add comprehensive tests for pagination edge cases (empty pages, large page_size, boundaries)
+I split up the tasks among 4 agents, to test out how agents can work in conjunction and synergistically with one another. 
+
 
 **Outputs:**
 - Modified `backend/app/main.py` with pagination query parameters
@@ -338,89 +306,38 @@ Agent would generate:
 4. **Agent 4 (Tests)**: Isolated to test files, could work independently
 
 **Coordination Strategy:**
-- **Zero coordination required** - used git worktrees to provide complete isolation
-- Each agent had their own working copy of the repository
-- No merge conflicts because agents worked on different files
-- Backend agents (1 & 2) worked on separate routers
-- Frontend agent (3) worked on separate files from backend
-- Test agent (4) worked on separate test files
+Each agent had their own working copy of the repository, and each agent focused on different actions. 
+No merge conflicts because agents worked on different files. Backend agents (1 & 2) worked on separate routers. 
+Frontend agent (3) worked on separate files from backend. 
+Test agent (4) worked on separate test files
 
 **Concurrency Wins:**
-- **70% reduction in wall-clock time** (90 min → 27 min)
-- **Perfect parallelization** - all 4 agents utilized fully
-- **No blocking dependencies** - agents didn't need to wait for each other
-- **Immediate verification** - all agents ran tests independently
-- **Mental context switching eliminated** - each agent focused on one concern
+Agents were able to work synchronously, in parallel, without waiting for other agents and 
+by running independently. 
 
-**Risks:**
-- **Schema conflicts**: Agents 1 & 2 both modified `schemas.py` - required manual merge
-- **Integration issues**: Changes needed to work together after merging
-- **Test dependencies**: Agent 4's tests assumed backend changes were complete
+**Concurrency Risks**
+Some agents both modified the same file. 
+Some agents also had to assume the work from the other agents was complete. 
 
 **Failures/Challenges:**
-- Both backend agents modified `schemas.py` simultaneously, causing merge conflicts
-- Had to use `PRE_COMMIT_ALLOW_NO_CONFIG=1` to bypass pre-commit hooks in worktrees
-- Initial attempt to use `git cherry-pick` failed due to uncommitted changes in main worktree
-- Solution: Committed all changes together after copying files to main worktree
-
-**Lessons Learned:**
-- Git worktrees are powerful for true parallelization
-- More granular task decomposition reduces merge conflicts (e.g., separate schema changes)
-- Integration testing after merge is critical
-- Pre-commit configuration should be copied to worktrees or disabled
-
+Both backend agents modified `schemas.py` simultaneously, causing merge conflicts. 
+I had to commit all changes together after copying files to main worktree
 ---
 
 **e. How you used the automation (what pain point it resolves or accelerates)**
 
 **Pain point resolved:** Large tasks like pagination require changes across multiple layers (backend, frontend, tests). Working sequentially is slow and requires constant context switching between concerns.
 
-**How used:**
+**How I used the automation:**
 - Decomposed Task #8 (pagination) into 4 parallel sub-tasks
 - Created isolated environments for each agent using git worktrees
 - Let agents work independently and simultaneously
 - Merged results at the end for integrated solution
 
-**Real workflow:**
-1. Created worktrees:
-   ```bash
-   git worktree add ../task8-backend-notes HEAD
-   git worktree add ../task8-backend-actions HEAD
-   git worktree add ../task8-frontend HEAD
-   git worktree add ../task8-tests HEAD
-   ```
-
-2. Opened 4 Warp tabs with specific prompts:
-   - **Agent 1**: "Add pagination to GET /notes endpoint..."
-   - **Agent 2**: "Add pagination to GET /action-items endpoint..."
-   - **Agent 3**: "Update frontend pagination UI..."
-   - **Agent 4**: "Add pagination tests for edge cases..."
-
-3. All agents executed simultaneously (~15 min wall-clock)
-
-4. Merged changes:
-   ```bash
-   git add backend/ frontend/
-   git commit -m "Add pagination feature (multi-agent workflow)"
-   ```
-
-5. Verified:
-   ```bash
-   make test  # 30 passed
-   make lint  # All checks passed
-   ```
-
-**Key benefits:**
-- **Eliminated context switching** - each agent focused on one layer
-- **Faster iteration** - no waiting for sequential dependencies
-- **Better focus** - each agent had a clear, narrow scope
-- **Scalability** - could add more agents for more sub-tasks
-
-**When this approach shines:**
-- Large features spanning multiple layers (backend, frontend, tests)
-- Independent sub-tasks with minimal cross-dependencies
-- Time-sensitive work where wall-clock time matters
-- Learning/exploring codebases where parallel investigation helps
+Key benefits and pain points eliminated include: 
+- Eliminated context switching 
+- Faster iteration 
+- Scalability
 
 
 ### (Optional) Automation C: Any Additional Automations
