@@ -17,7 +17,7 @@ This assignment took me about 1.5 hours to do.
 
 
 ## Brief findings overview 
-Generally, Semgrep reported a lot of findings related to untrusted inputs, which may be exploited by attackers to inject SQL statements to gain access to data.  Some noisy readings that I chose to ignore were related to the usage of eval(), which can be dangerous if the input is untrusted and from outside the program. This isn't as big an issue because generally, it's unlikely that the content willb be used for outside inputs. 
+Generally, Semgrep reported a lot of findings related to untrusted inputs, which may be exploited by attackers to inject SQL statements to gain access to data. A lot of other findings were classified into untrusted inputs and potential malicious inputs by users. Some noisy readings that I chose to ignore were related to the usage of eval(), which can be dangerous if the input is untrusted and from outside the program. This isn't as big an issue because generally, it's unlikely that the content can be inputted from outside the program. I also ignored the wildcard-cors rule for now, which seems to suggest that CORS policy allows any origin which should is insecure, since I don't anticipate this coming up in the near future. 
 
 ## Fix #1
 a. File and line(s)
@@ -43,10 +43,10 @@ a. File and line(s)
 > This issue is in line 104 of notes.py. 
 
 b. Rule/category Semgrep flagged
-> Semgrep flagged the issue of appliactions evaluating untrusted inputs, which can also lead to code injection vulnerabilities and attackers executing arbitrary code. 
+> Semgrep flagged the issue of applications evaluating untrusted inputs, which can also lead to code injection vulnerabilities and attackers executing arbitrary code. 
 
 c. Brief risk description
-> Attackers can execute arbitrary code and gain control of the system. 
+> Attackers can execute arbitrary code and gain control of the system from untrusted inputs. 
 
 d. Your change (short code diff or explanation, AI coding tool usage)
 > Windsurf did the following: 
@@ -56,7 +56,7 @@ d. Your change (short code diff or explanation, AI coding tool usage)
 Updated typing annotations to stay compatible with the project’s Python 3.7 runtime, swapping to typing.List/Optional across the routers, schemas, services, and DB helpers (week6/backend/app/routers/action_items.py (lines 1-40), week6/backend/app/schemas.py (lines 1-45), week6/backend/app/services/extract.py (lines 1-13), week6/backend/app/db.py (lines 1-27)).
 
 e. Why this mitigates the issue
-> This mitigates the issue by allowing preventing user-controlled clause injection. Every node is validated before being computed, so attackers are unable to inject arbitrary Python code. Also, the handler no longer passes user input straight to the eval, instead, it is passed with ast.parse which allows only numeric literals and raises an error on any other operations. 
+> This mitigates the issue by allowing prevention of user-controlled clause injection. Every node is validated before being computed, so attackers are unable to inject arbitrary Python code. Also, the handler no longer passes user input straight to the eval, instead, it is passed with ast.parse which allows only numeric literals and raises an error on any other operations. 
 
 ## Fix #3
 a. File and line(s)
