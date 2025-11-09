@@ -28,7 +28,9 @@ def create_note(payload: NoteCreate, db: Session = Depends(get_db)) -> SuccessRe
 
 
 @router.get("/search/", response_model=SuccessResponse[list[NoteRead]])
-def search_notes(q: Optional[str] = None, db: Session = Depends(get_db)) -> SuccessResponse[list[NoteRead]]:
+def search_notes(
+    q: Optional[str] = None, db: Session = Depends(get_db)
+) -> SuccessResponse[list[NoteRead]]:
     if not q:
         rows = db.execute(select(Note)).scalars().all()
     else:

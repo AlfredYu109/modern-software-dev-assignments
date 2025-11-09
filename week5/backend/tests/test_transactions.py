@@ -72,7 +72,7 @@ def test_action_item_completion_consistency(client):
 def test_note_creation_with_special_characters(client):
     """Test that special characters are handled correctly."""
     special_chars_title = "Title with 'quotes' and \"double quotes\""
-    special_chars_content = 'Content with <html>, & ampersand, and unicode: 你好'
+    special_chars_content = "Content with <html>, & ampersand, and unicode: 你好"
 
     payload = {"title": special_chars_title, "content": special_chars_content}
     r = client.post("/notes/", json=payload)

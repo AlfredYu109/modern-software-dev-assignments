@@ -45,9 +45,7 @@ async def http_exception_handler(request: Request, exc: StarletteHTTPException) 
     elif exc.status_code == 401:
         code = "UNAUTHORIZED"
 
-    error_response = ErrorResponse(
-        error=ErrorDetail(code=code, message=str(exc.detail))
-    )
+    error_response = ErrorResponse(error=ErrorDetail(code=code, message=str(exc.detail)))
     return JSONResponse(
         status_code=exc.status_code,
         content=error_response.model_dump(),
@@ -65,9 +63,7 @@ async def validation_exception_handler(
     else:
         message = "Validation error"
 
-    error_response = ErrorResponse(
-        error=ErrorDetail(code="VALIDATION_ERROR", message=message)
-    )
+    error_response = ErrorResponse(error=ErrorDetail(code="VALIDATION_ERROR", message=message))
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content=error_response.model_dump(),
@@ -85,9 +81,7 @@ async def pydantic_validation_exception_handler(
     else:
         message = "Validation error"
 
-    error_response = ErrorResponse(
-        error=ErrorDetail(code="VALIDATION_ERROR", message=message)
-    )
+    error_response = ErrorResponse(error=ErrorDetail(code="VALIDATION_ERROR", message=message))
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content=error_response.model_dump(),
@@ -95,9 +89,7 @@ async def pydantic_validation_exception_handler(
 
 
 @app.exception_handler(SQLAlchemyError)
-async def sqlalchemy_exception_handler(
-    request: Request, exc: SQLAlchemyError
-) -> JSONResponse:
+async def sqlalchemy_exception_handler(request: Request, exc: SQLAlchemyError) -> JSONResponse:
     error_response = ErrorResponse(
         error=ErrorDetail(code="DATABASE_ERROR", message="A database error occurred")
     )

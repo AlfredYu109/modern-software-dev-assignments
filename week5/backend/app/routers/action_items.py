@@ -17,7 +17,9 @@ def list_items(db: Session = Depends(get_db)) -> SuccessResponse[list[ActionItem
 
 
 @router.post("/", response_model=SuccessResponse[ActionItemRead], status_code=201)
-def create_item(payload: ActionItemCreate, db: Session = Depends(get_db)) -> SuccessResponse[ActionItemRead]:
+def create_item(
+    payload: ActionItemCreate, db: Session = Depends(get_db)
+) -> SuccessResponse[ActionItemRead]:
     item = ActionItem(description=payload.description, completed=False)
     db.add(item)
     db.flush()
