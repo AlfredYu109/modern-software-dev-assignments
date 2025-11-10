@@ -184,13 +184,168 @@ Test the question length threshold - Current test doesn't verify the 10-char thr
 
 ## Task 3: Try adding a new model and relationships
 a. Links to relevant commits/issues
-> TODO
+> https://app.graphite.com/github/pr/AlfredYu109/modern-software-dev-assignments/5/Week-3-No-Whitespace
 
 b. PR Description
-> TODO
+> TL;DR
+Added a tagging system for notes and action items with many-to-many relationships.
+
+What changed?
+Created a new Tag model with name and color fields
+Implemented many-to-many relationships between Tags and Notes/ActionItems
+Added bidirectional relationships between Notes and ActionItems
+Created a new /tags API router with CRUD operations
+Added endpoints for associating/disassociating tags with notes and action items
+Implemented tag statistics endpoint to track usage
+Added comprehensive test suite for all tag functionality
+How to test?
+Create tags with POST /tags/ endpoint
+Associate tags with notes using POST /tags/notes/{note_id}/tags
+Associate tags with action items using POST /tags/action-items/{item_id}/tags
+View tag statistics with GET /tags/stats/summary
+Run the test suite with pytest backend/tests/test_tags.py
+Why make this change?
+Enables better organization of notes and action items through categorization
+Provides a flexible way to filter and group related items
+Allows tracking usage patterns through tag statistics
+Creates a foundation for more advanced filtering and organization features
+Tradeoffs:
+Increased data model complexity with many-to-many relationships and cascade deletes
+Additional N+1 query concerns when loading tags with notes/action items (consider eager loading for production)
+
+Limitations:
+No filtering by tags on /notes/ or /action-items/ list endpoints
+Tag names are case-sensitive (can create both "urgent" and "Urgent")
+No limit on tags per note/action item
+Tag stats endpoint may be slow with large datasets (no caching/indexing strategy)
+Cascade deletes are permanent (no soft delete option)
+
+Follow-ups:
+Add ?tags= filter parameter to notes and action items list endpoints
+Implement tag name normalization (e.g., lowercase, trim whitespace)
+Add endpoint to retrieve all notes/action items by tag ID
+Consider adding pagination to tag statistics
+Add bulk tag operations (associate/disassociate tags from multiple items at once)
+Performance optimization for stats with caching or materialized views
 
 c. Graphite Diamond generated code review
-> TODO
+> Graphite had 3 comments:
+1. The delete-orphan cascade is incompatible with nullable note_id. When an ActionItem is removed from note.action_items or has its note_id set to None, it will be deleted from the database instead of just being disassociated. This breaks the expected behavior where action items can exist independently without a note (as shown in tests at lines 271-276).
+
+Fix: Remove delete-orphan from the cascade:
+
+action_items = relationship(
+    "ActionItem",
+    back_populates="note",
+    cascade="all, delete",  # Remove delete-orphan
+    foreign_keys="ActionItem.note_id",
+
+2. Missing validation that note_id exists before creating the ActionItem. If a non-existent note_id is provided, this will cause a foreign key constraint violation at the database level.
+
+Fix: Add validation:
+
+def create_item(payload: ActionItemCreate, db: Session = Depends(get_db)) -> ActionItemRead:
+    if payload.note_id is not None:
+        note = db.get(Note, payload.note_id)
+        if not note:
+            raise HTTPException(status_code=404, detail=f"Note with id {payload.note_id} not found")
+    item = ActionItem(description=payload.description, completed=False, note_id=payload.note_id)
+    # ...
+
+Suggested change
+    item = ActionItem(description=payload.description, completed=False, note_id=payload.note_id)
+    if payload.note_id is not None:
+        note = db.get(Note, payload.note_id)
+        if not note:
+            raise HTTPException(status_code=404, detail=f"Note with id {payload.note_id} not found")
+    item = ActionItem(description=payload.description, completed=False, note_id=payload.note_id)
+
+3. Missing validation when updating note_id. If a non-existent note_id is provided, this will cause a foreign key constraint violation.
+
+Fix: Add validation:
+
+if payload.note_id is not None:
+    note = db.get(Note, payload.note_id)
+    if not note:
+        raise HTTPException(status_code=404, detail=f"Note with id {payload.note_id} not found")
+    item.note_id = payload.note_id
+
+Suggested change
+    if payload.note_id is not None:
+        item.note_id = payload.note_id
+    if payload.note_id is not None:
+        note = db.get(Note, payload.note_id)
+        if not note:
+            raise HTTPException(status_code=404, detail=f"Note with id {payload.note_id} not found")
+        item.note_id = payload.note_id
+
+"1. N+1 Query Problem
+Lines 21-48 in notes.py and tag endpoints don't eager-load relationships:
+
+# In notes.py list_notes():
+from sqlalchemy.orm import selectinload
+
+stmt = select(Note).options(selectinload(Note.tags))
+2. Duplicate Code in Tag Association
+Lines 170-245 have nearly identical logic:
+
+# Create a generic helper function
+def _associate_tags(entity, tag_ids: list[int], db: Session):
+    for tag_id in tag_ids:
+        tag = db.get(Tag, tag_id)
+        if not tag:
+            raise HTTPException(404, f"Tag with id {tag_id} not found")
+        if tag not in entity.tags:
+            entity.tags.append(tag)
+3. Transaction Atomicity
+Tag association can fail partway through. Either all tags should be added or none:
+
+# Validate all tags exist first, then add them
+tags = [db.get(Tag, tid) for tid in tag_association.tag_ids]
+if any(t is None for t in tags):
+    raise HTTPException(404, "One or more tags not found")
+
+for tag in tags:
+    if tag not in note.tags:
+        note.tags.append(tag)
+4. Stats Query Efficiency
+Lines 20-88 runs multiple queries. Combine into a single CTE:
+
+# Use a single query with CTEs instead of multiple queries
+5. Case-Insensitive Tag Names
+Line 123 allows "urgent" and "Urgent":
+
+# In TagCreate validator:
+return v.strip().lower()
+
+# In models.py:
+name = Column(String(50), nullable=False, unique=True, index=True)
+# Add a check constraint for lowercase
+6. Missing Limit on List Endpoint
+Line 94 has limit: int = 100 with no max:
+
+limit: int = Query(100, le=200)  # Like notes endpoint
+7. Stats Response Model
+Line 178 in schemas.py uses generic dict:
+
+class TagUsage(BaseModel):
+    id: int
+    name: str
+    usage_count: int
+
+class TagStats(BaseModel):
+    most_used_tags: list[TagUsage]
+8. No Filtering by Tags
+Add query params to notes/action items endpoints:
+
+def list_notes(
+    ...
+    tag_ids: list[int] | None = Query(None),
+):
+    if tag_ids:
+        stmt = stmt.join(Note.tags).where(Tag.id.in_(tag_ids))
+9. Missing Commits
+No db.commit() anywhere - you're using db.flush(). If using auto-commit, document it. Otherwise add commits."
 
 ## Task 4: Improve tests for pagination and sorting
 a. Links to relevant commits/issues
