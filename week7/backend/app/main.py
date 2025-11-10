@@ -9,13 +9,17 @@ from .models import Base
 from .routers import action_items as action_items_router
 from .routers import notes as notes_router
 
+BASE_DIR = Path(__file__).resolve().parents[2]
+DATA_DIR = BASE_DIR / "data"
+FRONTEND_DIR = BASE_DIR / "frontend"
+
 app = FastAPI(title="Modern Software Dev Starter (Week 6)", version="0.1.0")
 
 # Ensure data dir exists
-Path("data").mkdir(parents=True, exist_ok=True)
+DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 # Mount static frontend
-app.mount("/static", StaticFiles(directory="frontend"), name="static")
+app.mount("/static", StaticFiles(directory=FRONTEND_DIR), name="static")
 
 
 # Compatibility with FastAPI lifespan events; keep on_event for simplicity here
@@ -27,7 +31,7 @@ def startup_event() -> None:
 
 @app.get("/")
 async def root() -> FileResponse:
-    return FileResponse("frontend/index.html")
+    return FileResponse(FRONTEND_DIR / "index.html")
 
 
 # Routers

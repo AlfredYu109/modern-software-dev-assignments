@@ -1,6 +1,9 @@
-from typing import Optional
+from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+# ruff: noqa: UP006,UP007  # keep typing.List/Optional for Python 3.7 compatibility at runtime
+from typing import List, Optional
+
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from sqlalchemy import asc, desc, select
 from sqlalchemy.orm import Session
 
@@ -9,26 +12,43 @@ from ..models import ActionItem
 from ..schemas import ActionItemCreate, ActionItemPatch, ActionItemRead
 
 router = APIRouter(prefix="/action-items", tags=["action_items"])
+ALLOWED_SORT_FIELDS = {
+    "created_at": ActionItem.created_at,
+    "updated_at": ActionItem.updated_at,
+    "description": ActionItem.description,
+    "id": ActionItem.id,
+}
 
 
-@router.get("/", response_model=list[ActionItemRead])
+def _apply_sorting(sort_param: str, stmt):
+    sort_field = sort_param.lstrip("-")
+    column = ALLOWED_SORT_FIELDS.get(sort_field)
+    if column is None:
+        raise HTTPException(status_code=400, detail=f"Unsupported sort field '{sort_field}'")
+    order_fn = desc if sort_param.startswith("-") else asc
+    return stmt.order_by(order_fn(column))
+
+
+def _get_item_or_404(db: Session, item_id: int) -> ActionItem:
+    item = db.get(ActionItem, item_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="Action item not found")
+    return item
+
+
+@router.get("/", response_model=List[ActionItemRead])
 def list_items(
     db: Session = Depends(get_db),
     completed: Optional[bool] = None,
-    skip: int = 0,
-    limit: int = Query(50, le=200),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=200),
     sort: str = Query("-created_at"),
-) -> list[ActionItemRead]:
+) -> List[ActionItemRead]:
     stmt = select(ActionItem)
     if completed is not None:
         stmt = stmt.where(ActionItem.completed.is_(completed))
 
-    sort_field = sort.lstrip("-")
-    order_fn = desc if sort.startswith("-") else asc
-    if hasattr(ActionItem, sort_field):
-        stmt = stmt.order_by(order_fn(getattr(ActionItem, sort_field)))
-    else:
-        stmt = stmt.order_by(desc(ActionItem.created_at))
+    stmt = _apply_sorting(sort, stmt)
 
     rows = db.execute(stmt.offset(skip).limit(limit)).scalars().all()
     return [ActionItemRead.model_validate(row) for row in rows]
@@ -45,9 +65,7 @@ def create_item(payload: ActionItemCreate, db: Session = Depends(get_db)) -> Act
 
 @router.put("/{item_id}/complete", response_model=ActionItemRead)
 def complete_item(item_id: int, db: Session = Depends(get_db)) -> ActionItemRead:
-    item = db.get(ActionItem, item_id)
-    if not item:
-        raise HTTPException(status_code=404, detail="Action item not found")
+    item = _get_item_or_404(db, item_id)
     item.completed = True
     db.add(item)
     db.flush()
@@ -55,13 +73,17 @@ def complete_item(item_id: int, db: Session = Depends(get_db)) -> ActionItemRead
     return ActionItemRead.model_validate(item)
 
 
+@router.get("/{item_id}", response_model=ActionItemRead)
+def get_item(item_id: int, db: Session = Depends(get_db)) -> ActionItemRead:
+    item = _get_item_or_404(db, item_id)
+    return ActionItemRead.model_validate(item)
+
+
 @router.patch("/{item_id}", response_model=ActionItemRead)
 def patch_item(
     item_id: int, payload: ActionItemPatch, db: Session = Depends(get_db)
 ) -> ActionItemRead:
-    item = db.get(ActionItem, item_id)
-    if not item:
-        raise HTTPException(status_code=404, detail="Action item not found")
+    item = _get_item_or_404(db, item_id)
     if payload.description is not None:
         item.description = payload.description
     if payload.completed is not None:
@@ -70,3 +92,11 @@ def patch_item(
     db.flush()
     db.refresh(item)
     return ActionItemRead.model_validate(item)
+
+
+@router.delete("/{item_id}", status_code=204, response_class=Response)
+def delete_item(item_id: int, db: Session = Depends(get_db)) -> Response:
+    item = _get_item_or_404(db, item_id)
+    db.delete(item)
+    db.flush()
+    return Response(status_code=204)

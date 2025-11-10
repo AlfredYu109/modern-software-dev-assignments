@@ -21,3 +21,26 @@ def test_create_list_and_patch_notes(client):
     assert r.status_code == 200
     patched = r.json()
     assert patched["title"] == "Updated"
+
+
+def test_note_validations_and_delete_flow(client):
+    bad_payload = {"title": " ", "content": "Body"}
+    r = client.post("/notes/", json=bad_payload)
+    assert r.status_code == 422
+
+    good_payload = {"title": "Keep me", "content": "Present"}
+    r = client.post("/notes/", json=good_payload)
+    assert r.status_code == 201
+    note_id = r.json()["id"]
+
+    r = client.get("/notes/", params={"sort": "-not-real"})
+    assert r.status_code == 400
+
+    r = client.patch(f"/notes/{note_id}", json={})
+    assert r.status_code == 422
+
+    r = client.delete(f"/notes/{note_id}")
+    assert r.status_code == 204
+
+    r = client.get(f"/notes/{note_id}")
+    assert r.status_code == 404
