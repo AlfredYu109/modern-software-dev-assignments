@@ -107,13 +107,80 @@ Pinned versions from 2024 may be outdated. Use rev: main or update to latest."
 
 ## Task 2: Extend extraction logic
 a. Links to relevant commits/issues
-> TODO
+> https://app.graphite.com/github/pr/AlfredYu109/modern-software-dev-assignments/4/Task-2-Whitespace-Fixed
 
 b. PR Description
-> TODO
+> TL;DR
+Enhanced action item extraction with sophisticated pattern recognition and added detailed metadata extraction capabilities.
+
+What changed?
+Implemented advanced pattern recognition for action items including:
+Additional action markers (FIXME, BUG, HACK, NOTE, XXX, OPTIMIZE, REFACTOR)
+Imperative phrases (Need to, Must, Should, Remember to, etc.)
+Checkbox patterns ([ ], [x])
+Priority markers ([HIGH], [URGENT], [P1], etc.)
+Question marks as potential action items
+Common imperative verbs (Add, Fix, Update, etc.)
+Added new extract_action_items_detailed() function that extracts structured metadata:
+Priority information (HIGH, URGENT, P1, etc.)
+Assignees from @mentions
+Categories based on action markers (bug, todo, optimization, etc.)
+Expanded test suite with comprehensive test cases:
+Basic extraction patterns
+Edge cases and special scenarios
+Detailed metadata extraction
+Real-world usage scenarios (meeting notes, code reviews, project planning)
+How to test?
+Run the expanded test suite:
+
+make test
+# or
+poetry run pytest backend/tests/test_extract.py -v
+Try extracting action items from various text formats:
+
+from backend.app.services.extract import extract_action_items, extract_action_items_detailed
+
+# Basic extraction
+items = extract_action_items("TODO: Fix bug\nNeed to update docs\n[HIGH] Critical issue!")
+print(items)
+
+# Detailed extraction with metadata
+detailed = extract_action_items_detailed("BUG: [P1] @alice Fix authentication issue")
+print(detailed)
+Why make this change?
+Improves action item detection with more sophisticated pattern recognition
+Provides structured metadata extraction for better organization and prioritization
+Enables more intelligent processing of notes by identifying priorities, assignees, and categories
+Supports real-world note-taking scenarios like meeting notes, code reviews, and project planning
 
 c. Graphite Diamond generated code review
-> TODO
+> Graphite didn't make any direct comments, but noted the following: "Performance & Structure
+Compile regex patterns once - Move regex compilation to module level:
+_PRIORITY_PATTERN = re.compile(r"^\[(?:HIGH|URGENT|LOW|P[1-5]|CRITICAL)\]\s+", re.IGNORECASE)
+_CHECKBOX_PATTERN = re.compile(r"^\[[ xX]?\]\s+")
+# ... other patterns
+Combine pattern checks - Use a single compiled regex instead of checking multiple patterns in loops:
+_IMPERATIVE_VERBS = re.compile(
+    r"^(?:add|fix|update|remove|create|implement|...)\s+",
+    re.IGNORECASE
+)
+Logic Issues
+Clean extracted descriptions - Remove priority markers and other metadata from the description in extract_action_items_detailed():
+# Strip priority markers, checkboxes from description
+cleaned = re.sub(priority_pattern, "", item)
+cleaned = re.sub(checkbox_pattern, "", cleaned).strip()
+Arbitrary thresholds - The len(line) > 10 for questions and len(line) > 5 for verbs are questionable. Consider removing or documenting why these exist.
+Type Safety
+Fix TypedDict - description should always be present:
+class ActionItemExtract(TypedDict):
+    description: str
+    priority: NotRequired[str]
+    assignee: NotRequired[str]
+    category: NotRequired[str]
+Testing
+Missing test coverage - No tests verify that patterns are actually stripped from descriptions (#lines-week7/backend/tests/test_extract.py-R208-R232)
+
+Test the question length threshold - Current test doesn't verify the 10-char threshold is correct" when prompted.
 
 ## Task 3: Try adding a new model and relationships
 a. Links to relevant commits/issues

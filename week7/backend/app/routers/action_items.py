@@ -44,7 +44,7 @@ def list_items(
 
 @router.post("/", response_model=ActionItemRead, status_code=201)
 def create_item(payload: ActionItemCreate, db: Session = Depends(get_db)) -> ActionItemRead:
-    item = ActionItem(description=payload.description, completed=False)
+    item = ActionItem(description=payload.description, completed=False, note_id=payload.note_id)
     db.add(item)
     db.flush()
     db.refresh(item)
@@ -58,7 +58,10 @@ def bulk_create_items(
     if not payload.items:
         raise HTTPException(status_code=400, detail="No action items provided for bulk creation")
 
-    items = [ActionItem(description=item.description, completed=False) for item in payload.items]
+    items = [
+        ActionItem(description=item.description, completed=False, note_id=item.note_id)
+        for item in payload.items
+    ]
     db.add_all(items)
     db.flush()
     for item in items:
@@ -160,6 +163,8 @@ def patch_item(
         item.description = payload.description
     if payload.completed is not None:
         item.completed = payload.completed
+    if payload.note_id is not None:
+        item.note_id = payload.note_id
     db.add(item)
     db.flush()
     db.refresh(item)
