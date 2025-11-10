@@ -9,11 +9,11 @@ Fill out all of the `TODO`s in this file.
 
 ## Submission Details
 
-Name: **TODO** \
-SUNet ID: **TODO** \
-Citations: **TODO**
+Name: **Alfred Yu** \
+SUNet ID: **ayu1001** \
+Citations: **Claude Code and Graphite**
 
-This assignment took me about **TODO** hours to do.
+This assignment took me about **5** hours to do.
 
 
 ## Task 1: Add more endpoints and validations
@@ -21,50 +21,15 @@ a. Links to relevant commits/issues
 > https://app.graphite.com/github/pr/AlfredYu109/modern-software-dev-assignments/3/Task-1-Claude-Try
 
 b. PR Description
-> TL;DR
-Added pre-commit hooks and enhanced the API with bulk operations, validation, and statistics endpoints.
+Description of the problem: There are limited API endpoints, which means that there is limited API functionality. The approach done here was to prompt Claude to add additional API endpoints, such as bulk operations for notes, and endpoints htat keep track of statistics on the notes. Specifically, Claude Code implemented: DELETE `/notes/{id}` and `/action-items/{id}`, POST `/notes/bulk` and `/notes/bulk/delete` (max 100 items), PUT `/action-items/bulk/complete`, GET `/notes/stats/summary` and `/action-items/stats/summary`, plus Pydantic validators with `@field_validator` for whitespace trimming and length constraints.
 
-What changed?
-Added a .pre-commit-config.yaml file with Black, Ruff, and basic file formatting hooks
-Enhanced input validation for notes and action items with field validators
-Added bulk operations for notes and action items:
-Bulk create
-Bulk delete
-Bulk complete (for action items)
-Added statistics endpoints:
-/notes/stats/summary - provides total count, character count, and average content length
-/action-items/stats/summary - provides total, completed, pending counts and completion rate
-Added individual delete endpoints for notes and action items
-Fixed code formatting and removed trailing whitespace/newlines
-How to test?
-Test bulk operations:
+Testing: Claude Code ran `make test` which executed 36 pytest tests (all passing), and manually tested with `curl -X POST http://localhost:8000/notes/bulk -d '{"notes":[{"title":"Test","content":"Content"}]}'` which successfully created bulk notes.
 
-# Bulk create notes
-curl -X POST http://localhost:8000/notes/bulk -H "Content-Type: application/json" -d '{"notes":[{"title":"Note 1","content":"Content 1"},{"title":"Note 2","content":"Content 2"}]}'
+Limitations: There is still limited functionality on some endpoints - these endpoints are not exhaustive.
 
-# Bulk delete notes
-curl -X POST http://localhost:8000/notes/bulk/delete -H "Content-Type: application/json" -d '{"ids":[1,2,3]}'
+Follow-up:  More features could be added, and API efficiency can be further improved on.
 
-# Bulk complete action items
-curl -X PUT http://localhost:8000/action-items/bulk/complete -H "Content-Type: application/json" -d '{"ids":[1,2,3]}'
-Test statistics endpoints:
 
-# Get notes statistics
-curl http://localhost:8000/notes/stats/summary
-
-# Get action items statistics
-curl http://localhost:8000/action-items/stats/summary
-Run pre-commit hooks:
-
-pip install pre-commit
-pre-commit install
-pre-commit run --all-files
-Why make this change?
-Pre-commit hooks ensure consistent code formatting and quality
-Bulk operations improve API efficiency for clients needing to perform multiple operations
-Statistics endpoints provide valuable insights into the application data
-Input validation ensures data integrity and prevents invalid entries
-Individual delete endpoints complete the CRUD functionality
 
 c. Graphite Diamond generated code review
 > Graphite Diamond actually did not have direct comments, but when the agent was prompted further, suggested this:
@@ -110,28 +75,9 @@ a. Links to relevant commits/issues
 > https://app.graphite.com/github/pr/AlfredYu109/modern-software-dev-assignments/4/Task-2-Whitespace-Fixed
 
 b. PR Description
-> TL;DR
-Enhanced action item extraction with sophisticated pattern recognition and added detailed metadata extraction capabilities.
+Description of the problem: The extraction logic is currently limited. We want more sophisticated pattern recognition, so we enhance the Regex coverage including additional action markers and more detailed action item extraction.
 
-What changed?
-Implemented advanced pattern recognition for action items including:
-Additional action markers (FIXME, BUG, HACK, NOTE, XXX, OPTIMIZE, REFACTOR)
-Imperative phrases (Need to, Must, Should, Remember to, etc.)
-Checkbox patterns ([ ], [x])
-Priority markers ([HIGH], [URGENT], [P1], etc.)
-Question marks as potential action items
-Common imperative verbs (Add, Fix, Update, etc.)
-Added new extract_action_items_detailed() function that extracts structured metadata:
-Priority information (HIGH, URGENT, P1, etc.)
-Assignees from @mentions
-Categories based on action markers (bug, todo, optimization, etc.)
-Expanded test suite with comprehensive test cases:
-Basic extraction patterns
-Edge cases and special scenarios
-Detailed metadata extraction
-Real-world usage scenarios (meeting notes, code reviews, project planning)
-How to test?
-Run the expanded test suite:
+The testing that can be done is via make test or attempted action items from the various text formats.
 
 make test
 # or
@@ -140,18 +86,11 @@ Try extracting action items from various text formats:
 
 from backend.app.services.extract import extract_action_items, extract_action_items_detailed
 
-# Basic extraction
-items = extract_action_items("TODO: Fix bug\nNeed to update docs\n[HIGH] Critical issue!")
-print(items)
 
-# Detailed extraction with metadata
-detailed = extract_action_items_detailed("BUG: [P1] @alice Fix authentication issue")
-print(detailed)
-Why make this change?
-Improves action item detection with more sophisticated pattern recognition
-Provides structured metadata extraction for better organization and prioritization
-Enables more intelligent processing of notes by identifying priorities, assignees, and categories
-Supports real-world note-taking scenarios like meeting notes, code reviews, and project planning
+Limitations may be that the Regex coverage is not necessarily perfect. False positives may be possible, and the numbers of len > 10 and len > 5 may be arbitrary.
+
+Follow-up: It may be wiser to implement parsing with ML rather than hard-coding. Tokenization and NLP parsing may be a better way of doing this.
+
 
 c. Graphite Diamond generated code review
 > Graphite didn't make any direct comments, but noted the following: "Performance & Structure
@@ -190,43 +129,13 @@ b. PR Description
 > TL;DR
 Added a tagging system for notes and action items with many-to-many relationships.
 
-What changed?
-Created a new Tag model with name and color fields
-Implemented many-to-many relationships between Tags and Notes/ActionItems
-Added bidirectional relationships between Notes and ActionItems
-Created a new /tags API router with CRUD operations
-Added endpoints for associating/disassociating tags with notes and action items
-Implemented tag statistics endpoint to track usage
-Added comprehensive test suite for all tag functionality
-How to test?
-Create tags with POST /tags/ endpoint
-Associate tags with notes using POST /tags/notes/{note_id}/tags
-Associate tags with action items using POST /tags/action-items/{item_id}/tags
-View tag statistics with GET /tags/stats/summary
-Run the test suite with pytest backend/tests/test_tags.py
-Why make this change?
-Enables better organization of notes and action items through categorization
-Provides a flexible way to filter and group related items
-Allows tracking usage patterns through tag statistics
-Creates a foundation for more advanced filtering and organization features
-Tradeoffs:
-Increased data model complexity with many-to-many relationships and cascade deletes
-Additional N+1 query concerns when loading tags with notes/action items (consider eager loading for production)
+Description of the problem: There didn't exist database models with relationships. The code added a new Tag mjodel and implemented relationships between the Tags and Action items.
 
-Limitations:
-No filtering by tags on /notes/ or /action-items/ list endpoints
-Tag names are case-sensitive (can create both "urgent" and "Urgent")
-No limit on tags per note/action item
-Tag stats endpoint may be slow with large datasets (no caching/indexing strategy)
-Cascade deletes are permanent (no soft delete option)
+Testing: You can run the test suite generated at pytest backend/tests/test_tags.py.
 
-Follow-ups:
-Add ?tags= filter parameter to notes and action items list endpoints
-Implement tag name normalization (e.g., lowercase, trim whitespace)
-Add endpoint to retrieve all notes/action items by tag ID
-Consider adding pagination to tag statistics
-Add bulk tag operations (associate/disassociate tags from multiple items at once)
-Performance optimization for stats with caching or materialized views
+Limitations: There isn't filtering on tags, and there are no limits on tags per note, which may be harmful in causing relational overloads.
+
+Follow-up: A limitation should be added. Bulk tag operations to immediately operate on a series of tags may be helpful as well.
 
 c. Graphite Diamond generated code review
 > Graphite had 3 comments:
@@ -349,23 +258,129 @@ No db.commit() anywhere - you're using db.flush(). If using auto-commit, documen
 
 ## Task 4: Improve tests for pagination and sorting
 a. Links to relevant commits/issues
-> TODO
+> https://app.graphite.com/github/pr/AlfredYu109/modern-software-dev-assignments/6/Task-4
 
 b. PR Description
-> TODO
+Problem: The tests for pagination and sorting functionality were not comprehensive.
+
+What changed:  Added comprehensive test suite for pagination and sorting functionality across Notes and Action Items endpoints.
+
+
+Testing: Run the test suite with pytest backend/tests/test_pagination_sorting.py
+We can test specific test classes with commands like:
+pytest backend/tests/test_pagination_sorting.py::TestNotesPagination
+pytest backend/tests/test_pagination_sorting.py::TestNotesSorting
+pytest backend/tests/test_pagination_sorting.py::TestActionItemsPagination
+pytest backend/tests/test_pagination_sorting.py::TestActionItemsSorting
+pytest backend/tests/test_pagination_sorting.py::TestEdgeCases
+
+Tradeoffs:
+
+Tests use time.sleep() to ensure different timestamps, which slows down test execution
+Tests create actual database records that require cleanup via fixtures
+Some tests depend on sorting order which could be fragile if default sort changes
+Limitations:
+Tests don't cover all possible combinations of sort fields with each other
+No tests for concurrent pagination scenarios (race conditions)
+Tests rely on database state isolation between test methods
+No performance/load tests for pagination with large datasets (1000+ items)
+Tests assume consistent database ordering within same timestamp
+
+Follow-ups:
+
+Add performance benchmarks for pagination with large datasets (10K+ items)
+Test concurrent access patterns to verify pagination consistency under load
+Add tests for additional sort fields if new sortable columns are added
+Consider replacing time.sleep() with mocked/controlled timestamps for faster tests
+Add tests for pagination cursor patterns if implemented in the future
+Test behavior with different database backends (PostgreSQL vs SQLite
 
 c. Graphite Diamond generated code review
-> TODO
+> Graphite Diamond didn't have direct comments, but when prompted further, suggested the following:
+"1. Remove code duplication with fixtures and helpers
+Lines 14-124 and 256-327 have nearly identical tests for Notes and Action Items.
+
+# Add to conftest.py or top of file
+import pytest
+
+@pytest.fixture
+def created_notes(client):
+    """Factory fixture for creating test notes."""
+    def _create(count, **kwargs):
+        ids = []
+        for i in range(count):
+            response = client.post("/notes/", json={
+                "title": kwargs.get("title", f"Note {i}"),
+                "content": kwargs.get("content", f"Content {i}")
+            })
+            ids.append(response.json()["id"])
+        return ids
+    return _create
+
+# Then use: created_notes(10) instead of loops
+2. Replace time.sleep() with controlled timestamps
+Lines 137, 153, 204, etc. use time.sleep() which is slow and flaky.
+
+from freezegun import freeze_time
+from datetime import datetime, timedelta
+
+def test_sort_by_created_at_descending(self, client):
+    base_time = datetime(2024, 1, 1)
+    for i in range(5):
+        with freeze_time(base_time + timedelta(seconds=i)):
+            client.post("/notes/", json={"title": f"Note {i}", "content": f"Content {i}"})
+3. Use parametrization for similar tests
+TestNotesPagination and TestActionItemsPagination are duplicates.
+
+@pytest.mark.parametrize("endpoint,payload", [
+    ("/notes/", {"title": "Note {}", "content": "Content {}"}),
+    ("/action-items/", {"description": "Task {}"}),
+])
+class TestPagination:
+    def test_basic_pagination(self, client, endpoint, payload):
+        # Create 10 items
+        for i in range(10):
+            client.post(endpoint, json={k: v.format(i) for k, v in payload.items()})
+        # ... rest of test
+4. Fix weak assertions
+Line 74: assert len(notes) >= 3 should be exact.
+
+assert len(notes) == 3  # We created exactly 3, should get exactly 3
+5. Extract constants
+Magic numbers throughout should be constants:
+
+MAX_LIMIT = 200
+DEFAULT_PAGE_SIZE = 5
+6. Better test isolation
+Lines 175-179: Filtering "our notes" suggests data leakage.
+
+# Either use database transactions that rollback, or:
+@pytest.fixture(autouse=True)
+def isolate_db(db):
+    yield
+    db.query(Note).delete()
+    db.query(ActionItem).delete()
+    db.commit()
+7. Test negative limit
+Missing test for limit=-1 which should likely return validation error.
+
+8. More specific error assertions
+Line 291: Should verify the error message too.
+
+response = client.get("/action-items/", params={"limit": 201})
+assert response.status_code == 422
+assert "limit" in response.json()["detail"][0]["loc"]
+These changes would make tests faster, more maintainable, and more reliable."
 
 ## Brief Reflection
 a. The types of comments you typically made in your manual reviews (e.g., correctness, performance, security, naming, test gaps, API shape, UX, docs).
-> TODO
+> I generally had trouble making comments. I thought the code Claude generated was pretty well-thought out and comprehensive (Graphite seemingly did too, given that there was only one action item where it had comments on the code, and even then, the comments were on things that I completely did not catch and was not aware of). I think one area that I noted was relative security - I was concerned that there was no rate limitations or authentications, which would be something that Semgrep would likely flag. I think the comments that I ended up making were generally more related to security than anything else.
 
 b. A comparison of **your** comments vs. **Graphite’s** AI-generated comments for each PR.
-> TODO
+> Graphite's AI generated comments were generally more comprehensive. To be fair, full-stack programming isn't something I have much expertise in and would consider myself a thorough expert in either. I think Graphite generally didn't comment as much on security, but I think that's because it was a bit more focused on the code itself, and I think I just happened to have that heuristic because of the previous Semgrep assignment.
 
 c. When the AI reviews were better/worse than yours (cite specific examples)
-> TODO
+> I didn't have comments on specific lines like Grpahite did. For example, this comment: ""The delete-orphan cascade is incompatible with nullable note_id. When an ActionItem is removed from note.action_items or has its note_id set to None, it will be deleted from the database instead of just being disassociated. This breaks the expected behavior where action items can exist independently without a note (as shown in tests at lines 271-276)." was something I would not have noticed, but Graphite did. I think being able to parse massive PRs, like the ones generated by Claude, was effective as well. Another example is this comment: "Missing validation that note_id exists before creating the ActionItem. If a non-existent note_id is provided, this will cause a foreign key constraint violation at the database level." I did not catch this at all, and given how long the PRs were, I found that I glossed over them and didn't look terribly in depth.
 
 d. Your comfort level trusting AI reviews going forward and any heuristics for when to rely on them.
->TODO
+> I actually think AI reviews were fairly trustworthy (this is also as someone who has very limited experience with these technologies and is not a master coder by any means), especially in this situation when the PRs generated were massive. It reminded me of what was mentioned in class, specifically about how AI reviews will be important because of the sheer amount of code being generated.  One thing to note is that it may be troublesome to try and force things without a clear direction, for example, forcing Graphite to find code errors where there aren't any may result in hallucinations that actually harm your code instead of helping. I think generally, it's always best to manually look over the code errors that were highlighted to see if they are valid.
