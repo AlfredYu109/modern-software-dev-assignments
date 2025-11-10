@@ -8,7 +8,7 @@ from sqlalchemy import asc, desc, select
 from sqlalchemy.orm import Session
 
 from ..db import get_db
-from ..models import ActionItem
+from ..models import ActionItem, Project
 from ..schemas import ActionItemCreate, ActionItemPatch, ActionItemRead
 
 router = APIRouter(prefix="/action-items", tags=["action_items"])
@@ -17,6 +17,7 @@ ALLOWED_SORT_FIELDS = {
     "updated_at": ActionItem.updated_at,
     "description": ActionItem.description,
     "id": ActionItem.id,
+    "project_id": ActionItem.project_id,
 }
 
 
@@ -40,6 +41,7 @@ def _get_item_or_404(db: Session, item_id: int) -> ActionItem:
 def list_items(
     db: Session = Depends(get_db),
     completed: Optional[bool] = None,
+    project_id: Optional[int] = Query(default=None, ge=1),
     skip: int = Query(0, ge=0),
     limit: int = Query(50, ge=1, le=200),
     sort: str = Query("-created_at"),
@@ -47,6 +49,8 @@ def list_items(
     stmt = select(ActionItem)
     if completed is not None:
         stmt = stmt.where(ActionItem.completed.is_(completed))
+    if project_id is not None:
+        stmt = stmt.where(ActionItem.project_id == project_id)
 
     stmt = _apply_sorting(sort, stmt)
 
@@ -56,7 +60,12 @@ def list_items(
 
 @router.post("/", response_model=ActionItemRead, status_code=201)
 def create_item(payload: ActionItemCreate, db: Session = Depends(get_db)) -> ActionItemRead:
-    item = ActionItem(description=payload.description, completed=False)
+    project = None
+    if payload.project_id is not None:
+        project = db.get(Project, payload.project_id)
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found")
+    item = ActionItem(description=payload.description, completed=False, project=project)
     db.add(item)
     db.flush()
     db.refresh(item)
@@ -88,6 +97,14 @@ def patch_item(
         item.description = payload.description
     if payload.completed is not None:
         item.completed = payload.completed
+    if "project_id" in payload.model_fields_set:
+        if payload.project_id is None:
+            item.project = None
+        else:
+            project = db.get(Project, payload.project_id)
+            if not project:
+                raise HTTPException(status_code=404, detail="Project not found")
+            item.project = project
     db.add(item)
     db.flush()
     db.refresh(item)

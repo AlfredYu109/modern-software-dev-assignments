@@ -8,6 +8,7 @@ from .db import apply_seed_if_needed, engine
 from .models import Base
 from .routers import action_items as action_items_router
 from .routers import notes as notes_router
+from .routers import projects as projects_router
 
 BASE_DIR = Path(__file__).resolve().parents[2]
 DATA_DIR = BASE_DIR / "data"
@@ -37,3 +38,4 @@ async def root() -> FileResponse:
 # Routers
 app.include_router(notes_router.router)
 app.include_router(action_items_router.router)
+app.include_router(projects_router.router)

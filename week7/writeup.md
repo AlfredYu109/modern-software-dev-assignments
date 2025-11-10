@@ -41,13 +41,37 @@ This would align the implementation with the PR title's stated purpose."
 
 ## Task 2: Extend extraction logic
 a. Links to relevant commits/issues
-> TODO
+> https://app.graphite.com/github/pr/AlfredYu109/modern-software-dev-assignments/2/Task-2
 
 b. PR Description
-> TODO
+> "TL;DR
+Enhanced action item extraction with advanced pattern recognition and deduplication logic
+
+What changed?
+Implemented a more sophisticated action item extraction system in extract.py that recognizes various patterns:
+TODO/action item prefixes
+Checkbox items
+Bullet points with action verbs
+Assignments (e.g., "Alice: follow up...")
+Phrases with modal verbs ("should", "need to")
+Lines with due dates or urgency indicators
+Added deduplication to prevent duplicate action items
+Created comprehensive test cases in test_extract.py to verify extraction logic
+Preserved backward compatibility with existing extraction patterns
+How to test?
+Run the new test suite to verify extraction functionality:
+
+pytest backend/tests/test_extract.py
+The tests validate:
+
+Recognition of various action item formats (TODOs, checkboxes, assignments, etc.)
+Proper deduplication of similar items
+Filtering out non-action content
+Why make this change?
+The previous extraction logic was overly simplistic, only recognizing items with "todo:" or "action:" prefixes, or those ending with exclamation marks. This enhancement significantly improves the system's ability to identify action items in real-world meeting notes that use diverse formats and linguistic patterns, making the feature more useful and accurate for end users."
 
 c. Graphite Diamond generated code review
-> TODO
+> "Graphite Agent found no issues"
 
 ## Task 3: Try adding a new model and relationships
 a. Links to relevant commits/issues
