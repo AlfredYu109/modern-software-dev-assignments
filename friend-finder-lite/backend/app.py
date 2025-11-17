@@ -49,12 +49,12 @@ def get_profiles():
 @app.route('/api/profiles/<profile_id>', methods=['GET'])
 def get_profile(profile_id):
     try:
-        result = supabase.table('profiles').select('*, interests(tag), activities(activity)').eq('id', profile_id).maybeSingle().execute()
+        result = supabase.table('profiles').select('*, interests(tag), activities(activity)').eq('id', profile_id).execute()
 
-        if not result.data:
+        if not result.data or len(result.data) == 0:
             return jsonify({'error': 'Profile not found'}), 404
 
-        return jsonify(result.data), 200
+        return jsonify(result.data[0]), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -138,12 +138,12 @@ def delete_profile(profile_id):
 @app.route('/api/profiles/<profile_id>/matches', methods=['GET'])
 def get_matches(profile_id):
     try:
-        profile_result = supabase.table('profiles').select('*, interests(tag), activities(activity)').eq('id', profile_id).maybeSingle().execute()
+        profile_result = supabase.table('profiles').select('*, interests(tag), activities(activity)').eq('id', profile_id).execute()
 
-        if not profile_result.data:
+        if not profile_result.data or len(profile_result.data) == 0:
             return jsonify({'error': 'Profile not found'}), 404
 
-        current_profile = profile_result.data
+        current_profile = profile_result.data[0]
         current_interests = set([i['tag'] for i in current_profile.get('interests', [])])
         current_activities = set([a['activity'] for a in current_profile.get('activities', [])])
 
