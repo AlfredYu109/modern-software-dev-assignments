@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = 'http://localhost:8080/api';
 
 export const api = {
     async getProfiles(filters = {}) {
