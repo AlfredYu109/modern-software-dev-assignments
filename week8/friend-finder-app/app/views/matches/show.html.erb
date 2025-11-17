@@ -1,0 +1,72 @@
+<div class="max-w-4xl mx-auto">
+  <div class="bg-white rounded-lg shadow-lg">
+    <!-- Chat Header -->
+    <div class="border-b border-gray-200 p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h1 class="text-2xl font-bold text-gray-900"><%= @match.matched_user.name %></h1>
+          <p class="text-sm text-gray-600">
+            <%= @match.matched_user.city %> • <%= @match.compatibility_score.to_i %>% match
+          </p>
+        </div>
+        <%= link_to "← Back to Matches", matches_path, class: "text-indigo-600 hover:text-indigo-800 font-medium" %>
+      </div>
+
+      <% if @match.matched_user.profile %>
+        <div class="mt-4 p-4 bg-gray-50 rounded-lg">
+          <p class="text-sm text-gray-700 mb-2"><strong>Interests:</strong> <%= @match.matched_user.profile.interests.join(', ') %></p>
+          <p class="text-sm text-gray-700"><strong>Vibes:</strong> <%= @match.matched_user.profile.vibes.join(', ') %></p>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Messages -->
+    <div class="p-6 bg-gray-50 h-96 overflow-y-auto" id="messages-container">
+      <% if @messages.any? %>
+        <div class="space-y-4">
+          <% @messages.each do |message| %>
+            <div class="<%= message.sender == current_user ? 'flex justify-end' : 'flex justify-start' %>">
+              <div class="<%= message.sender == current_user ? 'bg-indigo-600 text-white' : 'bg-white text-gray-900' %> rounded-lg px-4 py-2 max-w-md shadow">
+                <p class="text-sm font-medium mb-1">
+                  <%= message.sender == current_user ? 'You' : @match.matched_user.name %>
+                </p>
+                <p><%= message.content %></p>
+                <p class="text-xs opacity-75 mt-1"><%= time_ago_in_words(message.created_at) %> ago</p>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="text-center text-gray-600 mt-20">
+          <p class="text-lg mb-2">Start the conversation!</p>
+          <p class="text-sm">Say hello to <%= @match.matched_user.name %></p>
+        </div>
+      <% end %>
+    </div>
+
+    <!-- Message Form -->
+    <div class="border-t border-gray-200 p-6">
+      <%= form_with model: @new_message, url: match_messages_path(@match), class: "flex space-x-4" do |f| %>
+        <div class="flex-1">
+          <%= f.text_field :content, class: "w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 px-4 py-2 border", placeholder: "Type your message...", required: true %>
+        </div>
+        <%= f.submit "Send", class: "bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-md cursor-pointer" %>
+      <% end %>
+
+      <div class="mt-4 text-center">
+        <p class="text-sm text-gray-600 mb-2">Ready to meet up?</p>
+        <%= link_to "Suggest a Hangout Time", events_path, class: "text-indigo-600 hover:text-indigo-800 font-medium" %>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Auto-scroll to bottom of messages
+  document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('messages-container');
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
+  });
+</script>

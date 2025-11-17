@@ -1,0 +1,112 @@
+<div>
+  <h1 class="font-bold text-3xl text-gray-900 mb-8">Welcome back, <%= current_user.name %>!</h1>
+
+  <!-- Friendship Garden -->
+  <div class="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 mb-8 shadow-md">
+    <div class="flex items-center justify-between">
+      <div>
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">Your Friendship Garden</h2>
+        <p class="text-gray-600">Your friendships are growing strong!</p>
+      </div>
+      <div class="text-center">
+        <div class="relative w-32 h-32">
+          <svg class="transform -rotate-90 w-32 h-32">
+            <circle cx="64" cy="64" r="56" stroke="#e5e7eb" stroke-width="8" fill="none" />
+            <circle cx="64" cy="64" r="56" stroke="#10b981" stroke-width="8" fill="none"
+                    stroke-dasharray="<%= 2 * Math::PI * 56 %>"
+                    stroke-dashoffset="<%= 2 * Math::PI * 56 * (1 - @friendship_score / 100.0) %>"
+                    stroke-linecap="round" />
+          </svg>
+          <div class="absolute top-0 left-0 w-full h-full flex items-center justify-center text-3xl font-bold text-green-600">
+            <%= @friendship_score %>%
+          </div>
+        </div>
+        <p class="text-sm text-gray-600 mt-2">Health Score</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center">
+        <div class="text-4xl mr-4">🤝</div>
+        <div>
+          <p class="text-gray-600 text-sm">Active Matches</p>
+          <p class="text-2xl font-bold text-gray-900"><%= @accepted_matches.count %></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center">
+        <div class="text-4xl mr-4">⏳</div>
+        <div>
+          <p class="text-gray-600 text-sm">Pending Matches</p>
+          <p class="text-2xl font-bold text-gray-900"><%= @pending_matches.count %></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6">
+      <div class="flex items-center">
+        <div class="text-4xl mr-4">🎉</div>
+        <div>
+          <p class="text-gray-600 text-sm">Upcoming Events</p>
+          <p class="text-2xl font-bold text-gray-900"><%= @upcoming_events.count %></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <div class="bg-white rounded-lg shadow p-6">
+      <h3 class="text-xl font-bold text-gray-900 mb-4">Quick Actions</h3>
+      <div class="space-y-3">
+        <%= link_to "Find New Matches", matches_path, class: "block w-full bg-indigo-600 hover:bg-indigo-700 text-white text-center font-medium py-3 px-4 rounded-md" %>
+        <%= link_to "Browse Events", events_path, class: "block w-full bg-green-600 hover:bg-green-700 text-white text-center font-medium py-3 px-4 rounded-md" %>
+        <%= button_to "Generate AI Matches", api_generate_matches_path, method: :post, class: "block w-full bg-purple-600 hover:bg-purple-700 text-white text-center font-medium py-3 px-4 rounded-md" %>
+      </div>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6">
+      <h3 class="text-xl font-bold text-gray-900 mb-4">New Match Suggestions</h3>
+      <% if @pending_matches.any? %>
+        <div class="space-y-3">
+          <% @pending_matches.each do |match| %>
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded">
+              <div>
+                <p class="font-medium text-gray-900"><%= match.matched_user.name %></p>
+                <p class="text-sm text-gray-600"><%= match.matched_user.city %> • <%= match.compatibility_score.to_i %>% match</p>
+              </div>
+              <%= link_to "View", match_path(match), class: "text-indigo-600 hover:text-indigo-800 font-medium" %>
+            </div>
+          <% end %>
+        </div>
+      <% else %>
+        <p class="text-gray-600">No pending matches. Generate some new matches!</p>
+      <% end %>
+    </div>
+  </div>
+
+  <!-- Recent Activity -->
+  <div class="bg-white rounded-lg shadow p-6">
+    <h3 class="text-xl font-bold text-gray-900 mb-4">Your Connections</h3>
+    <% if @accepted_matches.any? %>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <% @accepted_matches.each do |match| %>
+          <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+            <p class="font-medium text-gray-900 mb-1"><%= match.matched_user.name %></p>
+            <p class="text-sm text-gray-600 mb-3">
+              <%= match.matched_user.city %> • <%= match.compatibility_score.to_i %>% match
+            </p>
+            <%= link_to "Chat", match_path(match), class: "text-sm text-indigo-600 hover:text-indigo-800 font-medium" %>
+          </div>
+        <% end %>
+      </div>
+    <% else %>
+      <p class="text-gray-600 text-center py-8">No active connections yet. Start finding your people!</p>
+    <% end %>
+  </div>
+</div>

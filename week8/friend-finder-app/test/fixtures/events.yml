@@ -1,0 +1,19 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  title: MyString
+  description: MyText
+  location: MyString
+  event_date: 2025-11-15 22:14:32
+  max_participants: 1
+  category: MyString
+  created_by: one
+
+two:
+  title: MyString
+  description: MyText
+  location: MyString
+  event_date: 2025-11-15 22:14:32
+  max_participants: 1
+  category: MyString
+  created_by: two

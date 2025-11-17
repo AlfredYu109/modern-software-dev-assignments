@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title><%= content_for(:title) || "Friend Finder App" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= yield :head %>
+
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" href="/icon.png" type="image/png">
+    <link rel="icon" href="/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/icon.png">
+    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+
+  <body class="bg-gray-50">
+    <% if logged_in? && current_user.onboarded %>
+      <nav class="bg-indigo-600 text-white shadow-lg">
+        <div class="container mx-auto px-4 py-3">
+          <div class="flex justify-between items-center">
+            <div class="flex space-x-6">
+              <%= link_to "Friend Finder", dashboard_path, class: "text-xl font-bold" %>
+              <%= link_to "Dashboard", dashboard_path, class: "hover:text-indigo-200" %>
+              <%= link_to "Matches", matches_path, class: "hover:text-indigo-200" %>
+              <%= link_to "Events", events_path, class: "hover:text-indigo-200" %>
+            </div>
+            <div class="flex space-x-4 items-center">
+              <span class="text-sm"><%= current_user.name %></span>
+              <%= button_to "Logout", logout_path, method: :delete, class: "bg-indigo-700 hover:bg-indigo-800 px-3 py-1 rounded" %>
+            </div>
+          </div>
+        </div>
+      </nav>
+    <% end %>
+
+    <% if flash[:notice] %>
+      <div class="container mx-auto mt-4 px-4">
+        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+          <%= flash[:notice] %>
+        </div>
+      </div>
+    <% end %>
+
+    <% if flash[:alert] %>
+      <div class="container mx-auto mt-4 px-4">
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+          <%= flash[:alert] %>
+        </div>
+      </div>
+    <% end %>
+
+    <main class="container mx-auto mt-8 px-4 pb-12">
+      <%= yield %>
+    </main>
+  </body>
+</html>

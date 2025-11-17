@@ -1,0 +1,21 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  hometown: MyString
+  interests: MyText
+  social_energy: MyString
+  preferred_formats: MyText
+  vibes: MyText
+  routine: MyText
+  transcript: MyText
+
+two:
+  user: two
+  hometown: MyString
+  interests: MyText
+  social_energy: MyString
+  preferred_formats: MyText
+  vibes: MyText
+  routine: MyText
+  transcript: MyText
