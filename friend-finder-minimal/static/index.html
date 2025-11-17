@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friend Finder Lite</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Friend Finder Lite</h1>
+            <p class="tagline">Connect with people who share your interests</p>
+        </header>
+
+        <nav>
+            <button class="nav-btn active" data-view="browse">Browse</button>
+            <button class="nav-btn" data-view="matches">My Matches</button>
+            <button class="nav-btn" data-view="connections">Connections</button>
+            <button class="nav-btn" data-view="profile">My Profile</button>
+        </nav>
+
+        <main id="app">
+            <div id="profile-view" class="view">
+                <h2>My Profile</h2>
+                <div id="profile-form-container">
+                    <form id="profile-form">
+                        <div class="form-group">
+                            <label for="name">Name *</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="bio">Bio</label>
+                            <textarea id="bio" name="bio" rows="3" placeholder="Tell us about yourself..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="city">City</label>
+                            <input type="text" id="city" name="city" placeholder="e.g., San Francisco">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="interests">Interests (comma-separated)</label>
+                            <input type="text" id="interests" name="interests" placeholder="e.g., hiking, reading, cooking">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="activities">Preferred Activities (comma-separated)</label>
+                            <input type="text" id="activities" name="activities" placeholder="e.g., coffee, concerts, hiking">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="availability">Availability</label>
+                            <select id="availability" name="availability">
+                                <option value="">Select availability</option>
+                                <option value="weekdays">Weekdays</option>
+                                <option value="weekends">Weekends</option>
+                                <option value="both">Both</option>
+                            </select>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary" id="save-profile-btn">Save Profile</button>
+                            <button type="button" class="btn btn-danger" id="delete-profile-btn" style="display: none;">Delete Profile</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div id="browse-view" class="view" style="display: none;">
+                <h2>Browse Profiles</h2>
+
+                <div class="filters">
+                    <input type="text" id="filter-city" placeholder="Filter by city">
+                    <input type="text" id="filter-interest" placeholder="Filter by interest">
+                    <button class="btn" id="apply-filters">Apply Filters</button>
+                    <button class="btn" id="clear-filters">Clear Filters</button>
+                </div>
+
+                <div id="profiles-list"></div>
+            </div>
+
+            <div id="matches-view" class="view" style="display: none;">
+                <h2>My Matches</h2>
+                <p class="hint">People who share your interests and activities</p>
+                <div id="matches-list"></div>
+            </div>
+
+            <div id="connections-view" class="view" style="display: none;">
+                <h2>Connections</h2>
+
+                <div class="connections-section">
+                    <h3>Incoming Requests</h3>
+                    <div id="incoming-requests"></div>
+                </div>
+
+                <div class="connections-section">
+                    <h3>My Friends</h3>
+                    <div id="friends-list"></div>
+                </div>
+            </div>
+
+            <div id="profile-detail-modal" class="modal">
+                <div class="modal-content">
+                    <span class="close">&times;</span>
+                    <div id="profile-detail"></div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Friend Finder Lite - Connect with like-minded people</p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
